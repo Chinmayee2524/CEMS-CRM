@@ -1,0 +1,30 @@
+public class EventRegistrationController {
+    private ApexPages.StandardController standardController;
+    public Event_Registration__c eventRegistration { get; set; } // Assuming EventRegistration__c is your custom object
+
+    // Constructor accepting the StandardController
+    public EventRegistrationController(ApexPages.StandardController controller) {
+        this.standardController = controller;
+        this.eventRegistration = (Event_Registration__c)controller.getRecord(); // Getting the current record
+        // Set default values, if necessary
+        eventRegistration.Registration_Date__c = System.now(); // Set Registration Date to current date/time
+        eventRegistration.Registration_Status__c = 'Registered'; // Default status
+    }
+
+    // Method to handle registration
+    public PageReference register() {
+        // Add your registration logic here
+        try {
+            // Insert the event registration record
+            insert eventRegistration;
+            // Redirect to a success page or return to the same page
+            return new PageReference('/apex/EventRegistrationSuccess'); // Change this to your success page
+        } catch (Exception e) {
+            // Handle exceptions (e.g., show an error message)
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, e.getMessage()));
+            return null; // Stay on the current page
+        }
+    }
+
+
+}
