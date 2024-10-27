@@ -1,0 +1,11 @@
+trigger PreventDuplicateRegistrations on Event_Registration__c (before insert) {
+    for (Event_Registration__c reg : Trigger.new) {
+        // Check if there is already a registration for this participant and event
+        List<Event_Registration__c> existingRegs = [SELECT Id FROM Event_Registration__c 
+                                                    WHERE Event__c = :reg.Event__c 
+                                                    AND Participant__c = :reg.Participant__c 
+                                                    LIMIT 1];
+        if (!existingRegs.isEmpty()) {
+            reg.addError('You are already registered for this event.');
+        }
+    }
