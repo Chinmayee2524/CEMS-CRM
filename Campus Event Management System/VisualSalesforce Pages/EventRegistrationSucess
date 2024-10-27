@@ -1,0 +1,9 @@
+<apex:page >
+    <apex:pageBlock title="Registration Successful">
+        <apex:pageBlockSection >
+            <h2>Your registration has been successfully completed!</h2>
+            <p>Thank you for registering for the event.</p>
+            <p><a href="https://drdypatilinstituteofengi-5f-dev-ed--c.develop.vf.force.com/apex/EventRegistration">Return to Home</a></p> <!-- Adjust the link to your desired destination -->
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:page>
