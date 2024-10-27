@@ -1,0 +1,16 @@
+trigger UpdateEventStatus on Event__c (before insert, before update) {
+    DateTime now = DateTime.now();
+    
+    for (Event__c event : Trigger.new) {
+        if (event.Start_Date_Time__c != null && event.End_Date_Time__c != null) {
+            // Update status to "In Progress" if the event has started but not ended
+            if (now >= event.Start_Date_Time__c && now < event.End_Date_Time__c) {
+                event.Event_Status__c = 'In Progress';
+            }
+            // Update status to "Completed" if the event has ended
+            else if (now >= event.End_Date_Time__c) {
+                event.Event_Status__c = 'Completed';
+            }
+            // Otherwise, keep the status as "Created" or "Published"
+        }
+    }
