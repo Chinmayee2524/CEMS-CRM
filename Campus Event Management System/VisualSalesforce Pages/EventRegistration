@@ -1,0 +1,19 @@
+<apex:page standardController="Event_Registration__c" extensions="EventRegistrationController">
+    <apex:form >
+        <apex:pageBlock title="Event Registration">
+            <apex:pageBlockSection >
+                <apex:inputField value="{!eventRegistration.Event__c}" label="Event" required="true" /> <!-- Lookup to Event -->
+                <apex:inputField value="{!eventRegistration.Participant__c}" label="Participant" required="true" /> <!-- Lookup to Participant -->
+                <apex:inputField value="{!eventRegistration.Registration_Status__c}" label="Registration Status" required="true" /> <!-- Picklist -->
+                <apex:inputField value="{!eventRegistration.Registration_Date__c}" label="Registration Date" required="true" /> <!-- Date/Time field -->
+                <!-- Add any additional fields as needed -->
+            </apex:pageBlockSection>
+
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Register" action="{!register}" />
+                <apex:commandButton value="Cancel" action="{!cancel}" immediate="true" />
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
+                          
