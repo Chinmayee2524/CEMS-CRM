@@ -1,0 +1,70 @@
+public with sharing class ClubMemberManager {
+    
+    // Method to retrieve all participants who are members of a specific club
+    @AuraEnabled
+    public static List<Participant__c> getClubMembers(Id clubId) {
+        return [
+            SELECT Id, Name, Email__c, Phone__c 
+            FROM Participant__c 
+            WHERE Club_Membership__c = :clubId // Assuming Club_Membership__c is the lookup field on Participant
+        ];
+    }
+
+    // Method to add a participant to a club
+    @AuraEnabled
+    public static String addMemberToClub(Id clubId, Id participantId) {
+        // Fetch the participant record
+        List<Participant__c> participants = [SELECT Id, Club_Membership__c FROM Participant__c WHERE Id = :participantId LIMIT 1];
+
+        // Check if a participant was found
+        if (participants.isEmpty()) {
+            return 'Error: Participant not found.';
+        }
+
+        Participant__c participant = participants[0];
+
+        // Check if the participant is already a member of the club
+        if (participant.Club_Membership__c != null) {
+            return 'Error: Participant is already a member of another club.';
+        }
+
+        // Update the participant's club membership
+        participant.Club_Membership__c = clubId;
+
+        try {
+            update participant;
+            return 'Participant added to the club successfully: ' + participant.Name;
+        } catch (DmlException e) {
+            return 'Error adding participant: ' + e.getMessage();
+        }
+    }
+
+    // Method to remove a participant from a club
+    @AuraEnabled
+    public static String removeMemberFromClub(Id participantId) {
+        // Fetch the participant record
+        List<Participant__c> participants = [SELECT Id, Club_Membership__c FROM Participant__c WHERE Id = :participantId LIMIT 1];
+
+        // Check if a participant was found
+        if (participants.isEmpty()) {
+            return 'Error: Participant not found.';
+        }
+
+        Participant__c participant = participants[0];
+
+        // Check if the participant is a member of a club
+        if (participant.Club_Membership__c == null) {
+            return 'Error: Participant is not a member of any club.';
+        }
+
+        // Remove the club membership
+        participant.Club_Membership__c = null;
+
+        try {
+            update participant;
+            return 'Participant removed from the club successfully: ' + participant.Name;
+        } catch (DmlException e) {
+            return 'Error removing participant: ' + e.getMessage();
+        }
+    }
+}
