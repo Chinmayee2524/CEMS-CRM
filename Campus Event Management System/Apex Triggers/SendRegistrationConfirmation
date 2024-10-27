@@ -1,0 +1,22 @@
+trigger SendRegistrationConfirmation on Event_Registration__c (after insert) {
+    for (Event_Registration__c reg : Trigger.new) {
+        // Get event and participant details
+        Event__c eventDetails = [SELECT Name, Start_Date_Time__c, Location__c FROM Event__c WHERE Id = :reg.Event__c LIMIT 1];
+        Participant__c participant = [SELECT Name, Email__c FROM Participant__c WHERE Id = :reg.Participant__c LIMIT 1];
+        
+        if (eventDetails != null && participant != null && !String.isBlank(participant.Email__c)) {
+            // Set up the email
+            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+            email.setToAddresses(new String[] {participant.Email__c});
+            email.setSubject('Registration Confirmation for ' + eventDetails.Name);
+            email.setPlainTextBody('Hello ' + participant.Name + ',\n\n' +
+                                   'Thank you for registering for ' + eventDetails.Name + '!\n' +
+                                   'Event Date: ' + eventDetails.Start_Date_Time__c + '\n' +
+                                   'Location: ' + eventDetails.Location__c + '\n\n' +
+                                   'We look forward to seeing you at the event!\n\nBest regards,\nEvent Management Team');
+            
+            // Send the email
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[] {email});
+        }
+    }
+}
