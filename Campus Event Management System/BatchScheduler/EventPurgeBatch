@@ -1,0 +1,52 @@
+global class EventPurgeBatch implements Database.Batchable<SObject>, Database.Stateful {
+    // List to hold email addresses of club organizers
+    private Set<String> organizerEmails = new Set<String>();
+
+    // Start method to define the scope of the batch
+    global Database.QueryLocator start(Database.BatchableContext BC) {
+        // Get the date two months ago
+        DateTime twoMonthsAgo = System.now().addMonths(-2);
+
+        // Query to get completed events older than two months
+        return Database.getQueryLocator(
+            [SELECT Id, Organizer__c, Organizer__r.Email__c 
+             FROM Event__c 
+             WHERE Event_Status__c = 'Completed' AND End_Date_Time__c < :twoMonthsAgo]
+        );
+    }
+
+    // Execute method to process each batch of records
+    global void execute(Database.BatchableContext BC, List<SObject> scope) {
+        List<Event__c> eventsToDelete = (List<Event__c>)scope;
+
+        // Collect organizer emails
+        for (Event__c event : eventsToDelete) {
+            // Check if the event has an organizer and if it has an email
+            if (event.Organizer__r != null && event.Organizer__r.Email__c != null) {
+                organizerEmails.add(event.Organizer__r.Email__c);
+            }
+        }
+
+        // Delete the old completed events
+        delete eventsToDelete;
+    }
+
+    // Finish method to send an email to the organizers
+    global void finish(Database.BatchableContext BC) {
+        if (organizerEmails.isEmpty()) return;
+
+        // Prepare email
+        List<String> emailList = new List<String>(organizerEmails);
+        String subject = 'Purge Summary: Completed Events';
+        String body = 'The following events have been purged as they were completed more than two months ago.';
+
+        // Create the email message
+        Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+        email.setToAddresses(emailList);
+        email.setSubject(subject);
+        email.setPlainTextBody(body);
+        
+        // Send email
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { email });
+    }
+}
