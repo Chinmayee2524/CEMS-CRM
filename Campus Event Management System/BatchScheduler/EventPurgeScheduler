@@ -1,0 +1,10 @@
+global class EventPurgeScheduler implements Schedulable {
+    // This method is called by the scheduler
+    global void execute(SchedulableContext SC) {
+        // Create an instance of the batch class
+        EventPurgeBatch batchJob = new EventPurgeBatch();
+        
+        // Execute the batch job with a specified batch size (e.g., 200)
+        Database.executeBatch(batchJob, 200);
+    }
+}
